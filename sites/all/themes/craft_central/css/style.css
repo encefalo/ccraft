@@ -20,14 +20,14 @@ body .page-header-wrap { background: #ed1c8b; color: #fff; height: 102px; }
 body .page-header-wrap .container { padding: 0; }
 body .page-header-wrap .container .page-header { border-bottom: 0; margin: 0; line-height: 102px; font-weight: 400; padding-bottom: 9px; }
 body .webform-client-form .webform-progressbar { margin: 0 auto; text-align: center; height: 90px; background: #fff; width: 100%; padding: 30px 0 0 0; }
-body .webform-client-form .webform-progressbar .webform-progressbar-outer { width: 730px; margin: 0 auto; position: relative; border: 1px solid #356900; height: 3px; background-color: white; }
+body .webform-client-form .webform-progressbar .webform-progressbar-outer { width: 100%; width: 100%; max-width: 730px; margin: 0 auto; position: relative; border: 1px solid #356900; height: 3px; background-color: white; }
 body .webform-client-form .webform-progressbar .webform-progressbar-outer .current { background-color: #454a5b; }
 body .webform-client-form .webform-progressbar .webform-progressbar-outer .webform-progressbar-page-label { position: relative; top: 10px; margin: 0 -10em; }
 body .webform-client-form .webform-component { background-color: #fff; margin-bottom: 40px; }
-body .webform-client-form .webform-component h1 { font-weight: 400; color: #454a5b; margin-bottom: 30px; width: 730px; margin: 0 auto; }
-body .webform-client-form .webform-component p { font-size: 16px; font-weight: 300; line-height: 26px; color: #6f7588; width: 730px; margin: 0 auto; }
+body .webform-client-form .webform-component h1 { font-weight: 400; color: #454a5b; margin-bottom: 30px; width: 100%; max-width: 730px; margin: 0 auto; }
+body .webform-client-form .webform-component p { font-size: 16px; font-weight: 300; line-height: 26px; color: #6f7588; width: 100%; max-width: 730px; margin: 0 auto; }
 body .webform-client-form .webform-component .form-text { border-radius: 0; height: 50px; box-shadow: none; }
-body .webform-client-form .webform-component-fieldset { background: #fff; padding: 30px; font-size: 16px; color: #767c8e; box-shadow: 0px 4px 15px -2px rgba(0, 0, 0, 0.19); width: 730px; margin: 0 auto !important; border-radius: 0; border: 0; padding-bottom: 70px !important; padding-top: 50px !important; margin-top: 40px !important; }
+body .webform-client-form .webform-component-fieldset { background: #fff; padding: 30px; font-size: 16px; color: #767c8e; box-shadow: 0px 4px 15px -2px rgba(0, 0, 0, 0.19); width: 100%; max-width: 730px; margin: 0 auto !important; border-radius: 0; border: 0; padding-bottom: 70px !important; padding-top: 50px !important; margin-top: 40px !important; }
 body .webform-client-form .webform-component-fieldset .panel-heading { top: 8px; color: #333333; background-color: transparent; border: 0; padding: 0; position: relative; margin-bottom: 30px; }
 body .webform-client-form .webform-component-fieldset .panel-heading .panel-title { border-left: 5px solid #ed1c8b; font-size: 24px; padding: 0 0 0 8px; color: #454a5b; margin: 0 0 26px 0; line-height: 25px; font-weight: 400; }
 body .webform-client-form .webform-component-fieldset .panel-body { padding: 0; }
@@ -43,7 +43,7 @@ body .webform-client-form .webform-component-fieldset .panel-body .form-group .s
 body .webform-client-form .webform-component-fieldset .panel-body .form-group .select2-container:after { font-family: FontAwesome; font-style: normal; text-rendering: auto; font-size: 20px; content: ""; color: white; background-color: #454a5b; height: 50px; line-height: 50px; pointer-events: none; position: absolute; right: 0px; text-align: center; top: 0px; width: 55px; }
 body .webform-client-form .webform-component-fieldset .form-group { margin-bottom: 20px; }
 body .webform-client-form .webform-component-select select { border: 1px solid #cccccc; color: #6f7588; height: 50px; border-radius: 0; background-image: none; padding: 6px 12px; min-width: 200px; }
-body .webform-client-form .form-actions { padding-top: 10px; width: 730px; position: relative; top: -79px; padding: 0 30px; }
+body .webform-client-form .form-actions { padding-top: 10px; width: 100%; max-width: 730px; position: relative; top: -79px; padding: 0 30px; }
 body .webform-client-form .form-actions .btn { float: right; font-weight: 400; background: #ed1c8b; color: #fff; border-radius: 0; border: none; text-transform: uppercase; padding: 15px 20px; }
 
 /*# sourceMappingURL=style.css.map */
