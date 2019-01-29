@@ -43,5 +43,7 @@ body .webform-client-form .webform-component-fieldset .panel-body .form-group .s
 body .webform-client-form .webform-component-fieldset .panel-body .form-group .select2-container:after { font-family: FontAwesome; font-style: normal; text-rendering: auto; font-size: 20px; content: ""; color: white; background-color: #454a5b; height: 50px; line-height: 50px; pointer-events: none; position: absolute; right: 0px; text-align: center; top: 0px; width: 55px; }
 body .webform-client-form .webform-component-fieldset .form-group { margin-bottom: 20px; }
 body .webform-client-form .webform-component-select select { border: 1px solid #cccccc; color: #6f7588; height: 50px; border-radius: 0; background-image: none; padding: 6px 12px; min-width: 200px; }
+body .webform-client-form .form-actions { padding-top: 10px; width: 730px; position: relative; top: -79px; padding: 0 30px; }
+body .webform-client-form .form-actions .btn { float: right; font-weight: 400; background: #ed1c8b; color: #fff; border-radius: 0; border: none; text-transform: uppercase; padding: 15px 20px; }
 
 /*# sourceMappingURL=style.css.map */

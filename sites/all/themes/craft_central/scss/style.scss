@@ -295,5 +295,22 @@ body{
         min-width: 200px;
       }
     }
+    .form-actions{
+      padding-top: 10px;
+      width: 730px;
+      position: relative;
+      top: -79px;
+      padding: 0 30px;
+      .btn{
+        float: right;
+        font-weight: 400;
+        background: #ed1c8b;
+        color: #fff;
+        border-radius: 0;
+        border: none;
+        text-transform: uppercase;
+        padding: 15px 20px;
+      }
+    }
   }
 }
