@@ -322,83 +322,99 @@ body{
 }
 
 .page-designer-maker-directory{
-  .view-header{
-    color: #767c8e;
-    background-color: #dadada;
-    padding: 40px 0;
-  }
-  .view-id-designer_maker_directory.view-display-id-block_2{
-    .views-row-1{
-      .views-field-image-URL{
-        float: left;
-        margin-right: 20px;
-        box-shadow: 0px 10px 55px 0px rgba(0,0,0,0.1);
-        color: #454a5b;
-        img{
-          object-fit: cover;
-          width: 100%;
-          left: 0;
-          top: 0;
-          position: relative;
-          max-width: 350px;
-          max-height: 350px;
-        }
+  .main-container{
+    .container{
+      min-height: calc(100vh - 474px);
+      width: auto;
+      padding: 0;
+      .view-header{
+        color: #767c8e;
+        background-color: #dadada;
+        padding: 40px 0;
       }
-      .views-field-display-name{
-        font-size: 30px;
-      }
-      .views-field-name{
-        text-transform: uppercase;
-        font-size: 16px;
-        margin-top: 10px;
-      }
-      .views-field-biography-3{
-        max-height: 208px;
-        margin-top: 10px;
-        font-weight: 300;
-        color: #454a5b;
-      }
-      .views-field-id{
-        margin-top: 6px;
-        color: #454a5b;
-        .field-content{
-          a{
-            min-height: 50px;
-            position: relative;
-            color: #fff;
-            background-color: #ed1c8b;
-            transition: background-color linear .1s;
-            text-decoration: none;
-            text-transform: uppercase;
-            padding: 0 30px !important;
-            line-height: 50px;
-            &:before {
-              content: '';
-              position: absolute;
-              display: inline-block;
-              right: -36px;
-              top: 34%;
-              cursor: pointer;
-              width: 19px;
-              height: 16px;
-              line-height: 49px;
-              text-align: center;
-              background: url(/sites/all/themes/craft_central/assets/icon-arrow.png) no-repeat;
-              background-size: 19px 16px;
-              z-index: 10;
-            }
-            &:after{
-              content: '';
-              position: absolute;
-              display: inline-block;
-              right: -49px;
+      .view-id-designer_maker_directory.view-display-id-block_2{
+        padding: 40px 0;
+        max-width: 1170px;
+        margin: 0 auto;
+        .views-row-1{
+          .views-field-image-URL{
+            float: left;
+            margin-right: 20px;
+            box-shadow: 0px 10px 55px 0px rgba(0,0,0,0.1);
+            color: #454a5b;
+            img{
+              object-fit: cover;
+              width: 100%;
+              left: 0;
               top: 0;
-              cursor: pointer;
-              width: 50px;
-              height: 100%;
-              line-height: 49px;
-              text-align: center;
-              background-color: #d80780;
+              position: relative;
+              max-width: 350px;
+              max-height: 350px;
+            }
+          }
+          .views-field-display-name{
+            font-size: 30px;
+            font-weight: 400;
+            color: #454a5b;
+          }
+          .views-field-name{
+            text-transform: uppercase;
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: 400;
+            color: #454a5b;
+          }
+          .views-field-biography-3{
+            min-height: 208px;
+            margin-top: 10px;
+            font-weight: 300;
+            color: #454a5b;
+          }
+          .views-field-id{
+            margin-top: 6px;
+            color: #454a5b;
+            .field-content{
+              a{
+                position: relative;
+                min-height: 50px;
+                color: #fff;
+                background-color: #ed1c8b;
+                transition: background-color linear .1s;
+                text-decoration: none;
+                text-transform: uppercase;
+                padding: 0 30px !important;
+                line-height: 50px;
+                font-size: 16px;
+                display: inline-block;
+                &:before {
+                  content: '';
+                  position: absolute;
+                  display: inline-block;
+                  right: -36px;
+                  top: 34%;
+                  cursor: pointer;
+                  width: 19px;
+                  height: 16px;
+                  line-height: 49px;
+                  text-align: center;
+                  background: url(/sites/all/themes/craft_central/assets/icon-arrow.png) no-repeat;
+                  background-size: 19px 16px;
+                  z-index: 10;
+                }
+                &:after{
+                  content: '';
+                  position: absolute;
+                  display: inline-block;
+                  right: -49px;
+                  top: 0;
+                  cursor: pointer;
+                  width: 50px;
+                  height: 100%;
+                  line-height: 49px;
+                  text-align: center;
+                  background-color: #d80780;
+                }
+              }
             }
           }
         }
