@@ -319,53 +319,54 @@ body{
       }
     }
   }
-  .page-designer-maker-directory{
-    .view-id-designer_maker_directory.view-display-id-block_2{
-      .views-row-1{
-        .views-field-image-URL{
-          float: left;
-          margin-right: 20px;
-          box-shadow: 0px 10px 55px 0px rgba(0,0,0,0.1);
-          color: #454a5b;
-          img{
-            object-fit: cover;
-            width: 100%;
-            left: 0;
-            top: 0;
+}
+
+.page-designer-maker-directory{
+  .view-id-designer_maker_directory.view-display-id-block_2{
+    .views-row-1{
+      .views-field-image-URL{
+        float: left;
+        margin-right: 20px;
+        box-shadow: 0px 10px 55px 0px rgba(0,0,0,0.1);
+        color: #454a5b;
+        img{
+          object-fit: cover;
+          width: 100%;
+          left: 0;
+          top: 0;
+          position: relative;
+          max-width: 350px;
+          max-height: 350px;
+        }
+      }
+      .views-field-display-name{
+        font-size: 30px;
+      }
+      .views-field-name{
+        text-transform: uppercase;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      .views-field-biography-3{
+        max-height: 208px;
+        margin-top: 10px;
+        font-weight: 300;
+        color: #454a5b;
+      }
+      .views-field-id{
+        margin-top: 6px;
+        color: #454a5b;
+        .field-content{
+          a{
+            min-height: 50px;
             position: relative;
-            max-width: 350px;
-            max-height: 350px;
-          }
-        }
-        .views-field-display-name{
-          font-size: 30px;
-        }
-        .views-field-name{
-          text-transform: uppercase;
-          font-size: 16px;
-          margin-top: 10px;
-        }
-        .views-field-biography-3{
-          max-height: 208px;
-          margin-top: 10px;
-          font-weight: 300;
-          color: #454a5b;
-        }
-        .views-field-id{
-          margin-top: 6px;
-          color: #454a5b;
-          .field-content{
-            a{
-              min-height: 50px;
-              position: relative;
-              color: #fff;
-              background-color: #ed1c8b;
-              transition: background-color linear .1s;
-              text-decoration: none;
-              text-transform: uppercase;
-              padding: 0 30px !important;
-              line-height: 50px;
-            }
+            color: #fff;
+            background-color: #ed1c8b;
+            transition: background-color linear .1s;
+            text-decoration: none;
+            text-transform: uppercase;
+            padding: 0 30px !important;
+            line-height: 50px;
           }
         }
       }
