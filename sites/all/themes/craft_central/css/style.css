@@ -47,7 +47,8 @@ body .webform-client-form .form-actions { padding-top: 10px; width: 100%; max-wi
 body .webform-client-form .form-actions .btn { float: right; font-weight: 400; background: #ed1c8b; color: #fff; border-radius: 0; border: none; text-transform: uppercase; padding: 15px 20px; }
 
 .page-designer-maker-directory .main-container .container { min-height: calc(100vh - 474px); width: auto; padding: 0; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 { color: #767c8e; background-color: #dadada; padding: 40px 0; max-width: 1170px; margin: 0 auto; }
+.page-designer-maker-directory .main-container .container .panel-display.panel-1col { background-color: #dadada; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 { color: #767c8e; padding: 40px 0; max-width: 1170px; margin: 0 auto; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 .panel-title { color: #454a5b; font-size: 36px; font-weight: 400; margin: 0; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 .views-row-1 { clear: both; zoom: 1; margin-top: 40px; font-size: 16px; overflow: visible; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 .views-row-1 .views-field-image-URL { float: left; margin-right: 20px; box-shadow: 0px 10px 55px 0px rgba(0, 0, 0, 0.1); color: #454a5b; }
@@ -60,13 +61,12 @@ body .webform-client-form .form-actions .btn { float: right; font-weight: 400; b
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 .views-row-1 .views-field-id .field-content a:before { content: ''; position: absolute; display: inline-block; right: -36px; top: 34%; cursor: pointer; width: 19px; height: 16px; line-height: 49px; text-align: center; background: url(/sites/all/themes/craft_central/assets/icon-arrow.png) no-repeat; background-size: 19px 16px; z-index: 10; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-1 .views-row-1 .views-field-id .field-content a:after { content: ''; position: absolute; display: inline-block; right: -49px; top: 0; cursor: pointer; width: 50px; height: 100%; line-height: 49px; text-align: center; background-color: #d80780; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 { position: relative; background-color: #fff; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .panel-title { position: relative; top: 50px; font-weight: 400; color: #454a5b; font-size: 24px; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters { position: relative; top: -30px; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form { position: relative; float: left; margin-top: 90px; width: 100%; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form .views-exposed-widgets { margin-bottom: .5em; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form .views-exposed-widgets .views-exposed-widget { position: relative; margin-bottom: 20px; float: left; padding: .5em 1em 0 0; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form .views-exposed-widgets .views-exposed-widget label { display: none; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form .views-exposed-widgets .views-exposed-widget .form-item { margin-top: 0; margin-bottom: 0; }
-.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .views-filters form .views-exposed-widgets .views-exposed-widget .form-item input { box-sizing: border-box !important; border-radius: 0; height: 50px; box-shadow: none; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-title { position: relative; top: 50px; font-weight: 400; color: #454a5b; font-size: 24px; max-width: 1170px; margin: 0 auto; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters { position: relative; top: -30px; max-width: 1170px; margin: 0 auto; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters form { position: relative; float: left; margin-top: 90px; width: 100%; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters form .views-exposed-form .views-exposed-widgets { position: relative; margin-bottom: 20px; float: left; padding: .5em 1em 0 0; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters form .views-exposed-form .views-exposed-widgets label { display: none; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters form .views-exposed-form .views-exposed-widgets .form-item { margin-top: 0; margin-bottom: 0; }
+.page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-filters form .views-exposed-form .views-exposed-widgets .form-item input { box-sizing: border-box !important; border-radius: 0; height: 50px; box-shadow: none; }
 
 /*# sourceMappingURL=style.css.map */

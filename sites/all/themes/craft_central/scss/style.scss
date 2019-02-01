@@ -327,9 +327,11 @@ body{
       min-height: calc(100vh - 474px);
       width: auto;
       padding: 0;
+      .panel-display.panel-1col{
+        background-color: #dadada;
+      }
       .pane-designer-maker-gallery-panel-pane-1{
         color: #767c8e;
-        background-color: #dadada;
         padding: 40px 0;
         max-width: 1170px;
         margin: 0 auto;
@@ -430,39 +432,44 @@ body{
       .pane-designer-maker-gallery-panel-pane-2{
         position: relative;
         background-color: #fff;
-        .panel-title{
+        .pane-title{
           position: relative;
           top: 50px;
           font-weight: 400;
           color: #454a5b;
           font-size: 24px;
+          max-width: 1170px;
+          margin: 0 auto;
         }
-        .views-filters{
-          position: relative;
-          top: -30px;
-          form{
+        .pane-content{
+          .view-filters{
             position: relative;
-            float: left;
-            margin-top: 90px;
-            width: 100%;
-            .views-exposed-widgets{
-              margin-bottom: .5em;
-              .views-exposed-widget{
-                position: relative;
-                margin-bottom: 20px;
-                float: left;
-                padding: .5em 1em 0 0;
-                label{
-                  display: none;
-                }
-                .form-item{
-                  margin-top: 0;
-                  margin-bottom: 0;
-                  input{
-                    box-sizing: border-box !important;
-                    border-radius: 0;
-                    height: 50px;
-                    box-shadow: none;
+            top: -30px;
+            max-width: 1170px;
+            margin: 0 auto;
+            form{
+              position: relative;
+              float: left;
+              margin-top: 90px;
+              width: 100%;
+              .views-exposed-form{
+                .views-exposed-widgets{
+                  position: relative;
+                  margin-bottom: 20px;
+                  float: left;
+                  padding: .5em 1em 0 0;
+                  label{
+                    display: none;
+                  }
+                  .form-item{
+                    margin-top: 0;
+                    margin-bottom: 0;
+                    input{
+                      box-sizing: border-box !important;
+                      border-radius: 0;
+                      height: 50px;
+                      box-shadow: none;
+                    }
                   }
                 }
               }
