@@ -327,16 +327,24 @@ body{
       min-height: calc(100vh - 474px);
       width: auto;
       padding: 0;
-      .view-header{
+      .pane-designer-maker-gallery-panel-pane-1{
         color: #767c8e;
         background-color: #dadada;
         padding: 40px 0;
-      }
-      .view-id-designer_maker_directory.view-display-id-block_2{
-        padding: 40px 0;
         max-width: 1170px;
         margin: 0 auto;
+        .panel-title{
+          color: #454a5b;
+          font-size: 36px;
+          font-weight: 400;
+          margin: 0;
+        }
         .views-row-1{
+          clear: both;
+          zoom: 1;
+          margin-top: 40px;
+          font-size: 16px;
+          overflow: visible;
           .views-field-image-URL{
             float: left;
             margin-right: 20px;
@@ -413,6 +421,49 @@ body{
                   line-height: 49px;
                   text-align: center;
                   background-color: #d80780;
+                }
+              }
+            }
+          }
+        }
+      }
+      .pane-designer-maker-gallery-panel-pane-2{
+        position: relative;
+        background-color: #fff;
+        .panel-title{
+          position: relative;
+          top: 50px;
+          font-weight: 400;
+          color: #454a5b;
+          font-size: 24px;
+        }
+        .views-filters{
+          position: relative;
+          top: -30px;
+          form{
+            position: relative;
+            float: left;
+            margin-top: 90px;
+            width: 100%;
+            .views-exposed-widgets{
+              margin-bottom: .5em;
+              .views-exposed-widget{
+                position: relative;
+                margin-bottom: 20px;
+                float: left;
+                padding: .5em 1em 0 0;
+                label{
+                  display: none;
+                }
+                .form-item{
+                  margin-top: 0;
+                  margin-bottom: 0;
+                  input{
+                    box-sizing: border-box !important;
+                    border-radius: 0;
+                    height: 50px;
+                    box-shadow: none;
+                  }
                 }
               }
             }
