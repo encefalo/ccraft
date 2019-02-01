@@ -18,7 +18,7 @@ body .breadcrumb a { color: #454a5b; }
 body .breadcrumb > li + li:before { content: "\f105"; }
 body .page-header-wrap { background: #ed1c8b; color: #fff; height: 102px; }
 body .page-header-wrap .container { padding: 0; }
-body .page-header-wrap .container .page-header { border-bottom: 0; margin: 0; line-height: 102px; font-weight: 400; padding-bottom: 9px; }
+body .page-header-wrap .container .page-header { border-bottom: 0; margin: 0 auto; line-height: 102px; font-weight: 400; padding-bottom: 9px; }
 body .webform-client-form .webform-progressbar { margin: 0 auto; text-align: center; height: 90px; background: #fff; width: 100%; padding: 30px 0 0 0; }
 body .webform-client-form .webform-progressbar .webform-progressbar-outer { width: 100%; width: 100%; max-width: 730px; margin: 0 auto; position: relative; border: 1px solid #356900; height: 3px; background-color: white; }
 body .webform-client-form .webform-progressbar .webform-progressbar-outer .current { background-color: #454a5b; }
@@ -83,5 +83,7 @@ body .webform-client-form .form-actions .btn { float: right; font-weight: 400; b
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-content .views-bootstrap-grid-plugin-style .row .gallery-column .views-field-image-URL .field-content img { object-fit: cover; font-family: 'object-fit:cover;'; width: 100%; position: absolute; left: 0; top: 0; height: 100%; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-content .views-bootstrap-grid-plugin-style .row .gallery-column .views-field-display-name { margin: 0; display: flex; height: 100px; width: 100%; background: #fff; align-items: center; }
 .page-designer-maker-directory .main-container .container .pane-designer-maker-gallery-panel-pane-2 .pane-content .view-content .views-bootstrap-grid-plugin-style .row .gallery-column .views-field-display-name .field-content { text-align: center; display: block; width: 100%; }
+
+.main-container .container { min-height: calc(100vh - 474px); width: auto; padding: 0; }
 
 /*# sourceMappingURL=style.css.map */
