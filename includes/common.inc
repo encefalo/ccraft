@@ -7273,6 +7273,9 @@ function drupal_schema_field_types($table) {
  */
 function drupal_schema_fields_sql($table, $prefix = NULL) {
   $schema = drupal_get_schema($table);
+  if (empty($schema['fields'])) {
+    $schema = drupal_get_schema($table, TRUE);
+  }
   $fields = array_keys($schema['fields']);
   if ($prefix) {
     $columns = array();
