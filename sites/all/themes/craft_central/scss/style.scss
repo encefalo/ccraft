@@ -447,6 +447,7 @@ body{
             top: -30px;
             max-width: 1170px;
             margin: 0 auto;
+            display: inline-block;
             form{
               position: relative;
               float: left;
@@ -527,6 +528,13 @@ body{
                 }
               }
             }
+          }
+          .view-content{
+            padding-top: 40px;
+            clear: both;
+            overflow: auto;
+            zoom: 1;
+            background: #dadada;
           }
         }
       }
