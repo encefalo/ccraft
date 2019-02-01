@@ -322,6 +322,11 @@ body{
 }
 
 .page-designer-maker-directory{
+  .view-header{
+    color: #767c8e;
+    background-color: #dadada;
+    padding: 40px 0;
+  }
   .view-id-designer_maker_directory.view-display-id-block_2{
     .views-row-1{
       .views-field-image-URL{
@@ -367,6 +372,34 @@ body{
             text-transform: uppercase;
             padding: 0 30px !important;
             line-height: 50px;
+            &:before {
+              content: '';
+              position: absolute;
+              display: inline-block;
+              right: -36px;
+              top: 34%;
+              cursor: pointer;
+              width: 19px;
+              height: 16px;
+              line-height: 49px;
+              text-align: center;
+              background: url(/sites/all/themes/craft_central/assets/icon-arrow.png) no-repeat;
+              background-size: 19px 16px;
+              z-index: 10;
+            }
+            &:after{
+              content: '';
+              position: absolute;
+              display: inline-block;
+              right: -49px;
+              top: 0;
+              cursor: pointer;
+              width: 50px;
+              height: 100%;
+              line-height: 49px;
+              text-align: center;
+              background-color: #d80780;
+            }
           }
         }
       }
