@@ -1,0 +1,345 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: edwinhernandezcabrera
+ * Date: 2019-02-02
+ * Time: 10:03
+ */
+
+/**
+ * Implements hook_install().
+ */
+function craft_central_module_install() {
+  _craft_central_module_create_membership_commerce_product_type();
+  _craft_central_module_create_membership_display();
+  _craft_central_module_add_commerce_product_and_display();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function craft_central_module_uninstall(){
+  _craft_central_module_delete_membership_display();
+  _craft_central_module_delete_membership_commerce_product_type();
+  variable_del('commerce_civicrm_contact_type');
+}
+
+/**
+ * Create Commerce Product Type.
+ */
+function _craft_central_module_create_membership_commerce_product_type(){
+  // Create the product type.
+  $product_type = commerce_product_ui_product_type_new();
+
+  $product_type['type'] = 'membership';
+  $product_type['name'] = t('Membership');
+  $product_type['description'] = t('Membership type product.');
+  $product_type['is_new'] = TRUE;
+  commerce_product_ui_product_type_save($product_type, FALSE);
+
+  $t = get_t();
+  $field_commerce_price = array();
+
+  if(!field_info_field('commerce_price')){
+    $field_commerce_price = array(
+      // Membership Price
+      'commerce_price'	=> array(
+        'field_name'	=> 'commerce_price',
+        'type'          => 'commerce_price',
+        'cardinality'	=> 1,
+        'settings' => array(
+          'currency_code' => 'default',
+        ),
+      ),
+    );
+  }
+
+  $fields = array(
+
+    // Membership Name
+    'membership_name'	=> array(
+      'field_name'	=> 'membership_name',
+      'type'          => 'list_text',
+      'cardinality'	=> 1,
+      'settings' => array(
+        'allowed_values' => _craft_central_module_get_civicrm_memerships(),
+      ),
+    ),
+
+    // Membership Duration
+    'membership_duration_time'	=> array(
+      'field_name'	=> 'membership_duration_time',
+      'type'          => 'text',
+      'cardinality'	=> 1,
+    ),
+
+    // Membership Duration Unit
+    'membership_duration_interval'	=> array(
+      'field_name'	=> 'membership_duration_interval',
+      'type'          => 'list_text',
+      'cardinality'	=> 1,
+      'settings' => array(
+        'allowed_values' => array(
+          'day' => 'Day',
+          'month' => 'Month',
+          'year' => 'Year',
+          'lifetime' => 'Lifetime'),
+      ),
+    ),
+
+    // Membership Type
+    'membership_type'	=> array(
+      'field_name'	=> 'membership_type',
+      'type'          => 'list_text',
+      'cardinality'	=> 1,
+      'settings' => array(
+        'allowed_values' => array(
+          'fixed' => 'Fixed',
+          'rolling' => 'Rolling'),
+      ),
+    ),
+
+
+
+  );
+
+  $fields = array_merge($field_commerce_price, $fields);
+
+  foreach( $fields as $field ) {
+
+    field_create_field($field);
+
+  }
+
+  // Step 3 - Attach fields to content type
+
+  $instances = array(
+
+    // Membership Price
+    'commerce_price'	=> array(
+      'field_name'   => 'commerce_price',
+      'label'        => t('Price'),
+      'required'     => TRUE,
+      'widget'       => array(
+        'type'	=> 'commerce_price_full',
+        'module' => 'commerce_price',
+      ),
+      'settings' => array(
+        'currency_code' => 'default',
+      ),
+
+    ),
+
+    // Membership Name
+    'membership_name'	=> array(
+      'field_name'   => 'membership_name',
+      'label'        => t('Membership'),
+      'required'     => TRUE,
+      'widget'       => array(
+        'type'	=> 'options_select'
+      ),
+      'commerce_cart_settings' => array(
+        'attribute_field' => 1,
+        'attribute_widget' => 'select',
+        'attribute_widget_title' => 'Memberships',
+      ),
+    ),
+
+    'membership_duration_time'	=> array(
+      'field_name'   => 'membership_duration_time',
+      'label'        => t('Membership Duration Time'),
+      'required'     => TRUE,
+      'widget'       => array(
+      'type'	=> 'text_textfield'
+      ),
+    ),
+
+    // Membership Duration Time
+    'membership_duration_interval'	=> array(
+      'field_name'   => 'membership_duration_interval',
+      'label'        => t('Membership Duration Interval'),
+      'required'     => TRUE,
+      'widget'       => array(
+        'type'	=> 'options_select'
+      ),
+    ),
+
+    // Membership Duration
+    'membership_type'	=> array(
+      'field_name'   => 'membership_type',
+      'label'        => t('Membership Type'),
+      'required'     => TRUE,
+      'widget'       => array(
+        'type'	=> 'options_select'
+      ),
+    ),
+
+
+  );
+
+  foreach( $instances as $instance ) { // Loop through our instances
+    $instance['entity_type']   = 'commerce_product';
+    $instance['bundle']        = 'membership'; // Attach the instance to our content type
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Create Content Type Product Dispaly for site wide Memberships of CiviCRM.
+ */
+function _craft_central_module_create_membership_display(){
+  // Product Dispaly
+  $fields = array();
+  $instances = array();
+  $content_type = array();
+  $t = get_t(); // We need to instantiate the t() function as it’s not available in the installation phase
+
+  // Step 1 - Defining the content type and saving it
+  $content_type = array(
+    'type'          => 'membership_display',
+    'name'          => $t('Memberships'),
+    'description'   => $t('This will put cart form for Membership products.'),
+    'title_label'   => $t('Title'),
+    'base'          => 'node_content',
+    'custom'        => TRUE,
+  );
+
+  $node_type = node_type_set_defaults($content_type); // Return a node type object with default values
+
+  node_type_save($node_type); // Save the node type object
+
+  // Step 2 - Add fields to content type
+  /*here you can add fields sir or edit the fields as you like*/
+  $fields = array(
+    // Membership Product Display
+    'membership_types'	=> array(
+    'field_name'   => 'membership_types',
+    'type'         => 'commerce_product_reference',
+    'cardinality'  => -1,
+    ),
+
+
+  );
+
+  foreach( $fields as $field ) { // Loop through fields and create them one by one
+    field_create_field($field);
+  }
+
+  // Step 3 - Attach fields to content type
+
+  $instances = array(
+    // Attaching Product Type
+    'membership_types'	=> array(
+      'field_name'   => 'membership_types',
+      'label'        => t('Select Memberships'),
+      'required'     => TRUE,
+      'widget'       => array(
+        'type'	=> 'commerce_product_reference_autocomplete',
+        'module' => 'commerce_product_reference',
+      ),
+      'settings' => array(
+        'field_injection' => 1,
+        'referenceable_types' => array(
+          'product' => 'membership'
+        )
+      ),
+    ),
+
+  );
+
+  foreach( $instances as $instance ) { // Loop through our instances
+    $instance['entity_type']   = 'node';
+    $instance['bundle']        = 'membership_display'; // Attach the instance to our content type
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Add Commerce Product Types for all Membership types and also adds Product display
+ * Node for site wide Memberships of CiviCRM.
+ */
+function _craft_central_module_add_commerce_product_and_display(){
+  if (!civicrm_initialize()) {
+    return;
+  }
+  //Preparing Membership Display Node Object
+  $node = (object)array('type' => 'membership_display');
+  node_object_prepare($node);
+  $node->title = "Memberships";
+  $node->uid = 1;
+
+  //Fetching CiviCRM Memberships
+  $mem_result = civicrm_api3('membership_type', 'get', array());
+
+  foreach ($mem_result['values'] as $all_membership_type) {
+    $product = commerce_product_new('membership');
+    $product->sku = $all_membership_type['id'].'-Membership-'.time();
+    $product->title = $all_membership_type['name'];
+    $product->language = LANGUAGE_NONE;
+    $product->uid = 1;
+    $product->commerce_price[LANGUAGE_NONE][0] = array(
+      'amount' => (int)$all_membership_type['minimum_fee'] * 100, // $10
+      'currency_code' => "USD",
+    );
+    $product->membership_name[LANGUAGE_NONE][0]['value'] = $all_membership_type['id'];
+    $product->membership_duration_interval[LANGUAGE_NONE][0]['value'] = $all_membership_type['duration_interval'];
+    $product->membership_duration_time[LANGUAGE_NONE][0]['value'] = $all_membership_type['duration_unit'];
+    $product->membership_type[LANGUAGE_NONE][0]['value'] = $all_membership_type['period_type'];
+
+    commerce_product_save($product);
+
+    //Adding Commerce Product in Display
+    $node->membership_types[LANGUAGE_NONE][]['product_id'] = $product->product_id;
+  }
+
+  //Saving Membership Display Node.
+  $node->language = LANGUAGE_NONE;
+  node_save($node);
+}
+
+/**
+ * Delete Product display content type and node(s) for site wide Memberships of CiviCRM.
+ */
+function _craft_central_module_delete_membership_display(){
+  // Remove existing content
+  $query = 'SELECT nid ';
+  $query .= 'FROM {node} ';
+  $query .= 'WHERE {node}.type = :type ';
+  $result = db_query( $query, array(':type'	=> 'membership_display') );
+
+  $nids = array();
+  foreach( $result as $row ) {
+  	$nids[] = $row->nid;
+  }
+
+  node_delete_multiple( $nids );
+
+  // Delete fields and instances
+
+  foreach( field_info_instances('node', 'membership_display') as $field_name	=> $instance ) {
+  	field_delete_instance($instance);
+  }
+
+  // Delete content type
+  node_type_delete('membership_display');
+
+  // Purge field batch
+  field_purge_batch(1000); // Purge delete fields data
+}
+
+/**
+ * Delete Commerce Product Types and entities for all Membership types of CiviCRM.
+ */
+function _craft_central_module_delete_membership_commerce_product_type(){
+  drupal_set_time_limit(0);
+
+  $product_ids = db_select('commerce_product', 'p')
+  ->fields('p', array('product_id'))
+  ->condition('type', 'membership','=')
+  ->execute()->fetchCol();
+
+  commerce_product_delete_multiple($product_ids);
+
+  // Delete product type.
+  commerce_product_ui_product_type_delete('membership');
+}

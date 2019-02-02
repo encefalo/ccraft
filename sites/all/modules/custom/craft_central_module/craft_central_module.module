@@ -1,0 +1,712 @@
+<?php
+
+/**
+ * @file
+ * Integrates Drupal Commerce with CiviCRM Membership
+ */
+
+/**
+ * Implements hook_help().
+ */
+function craft_central_module_help($path = 'admin/help#craft_central_module') {
+  switch ($path) {
+    case 'admin/help#craft_central_module':
+      return t('Create an appropriate configuration screen for Commerce product variations so that you can specify:
+
+a) whether a membership should be granted 
+b) which membership type the contact purchasing the product will receive
+c) BONUS the start date of the membership');
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function craft_central_module_menu() {
+  $items['admin/commerce/config/civicrm_membership'] = array(
+    'title' => 'CiviCRM Membership',
+    'description' => 'Configure Drupal Commerce and CiviCRM Membership integration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('craft_central_module_admin'),
+    'access arguments' => array('configure store'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements CiviCRM Membership configuration form.
+ */
+function craft_central_module_admin() {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Core/Config.php';
+
+  $contact_types = array();
+  $sub_types = array();
+  $result = civicrm_api3('contact_type', 'get', array('is_active' => 1));
+
+  foreach ($result['values'] as $all_contact_type) {
+    if (empty($all_contact_type['parent_id'])) {
+      $contact_types[strtolower($all_contact_type['name'])] = $all_contact_type['label'];
+      continue;
+    }
+    $sub_types[strtolower($result['values'][$all_contact_type['parent_id']]['name'])][strtolower($all_contact_type['name'])] = $all_contact_type['label'];
+  }
+
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'craft_central_module') . '/css/style.css',
+  );
+
+  $form['commerce_civicrm_contact_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Contact type'),
+    '#default_value' => variable_get('commerce_civicrm_contact_type', array()),
+    '#options' => $contact_types,
+    '#required' => TRUE,
+    '#description' => t('Select a Contact type.'),
+  );
+  foreach ($sub_types as $main_contact_types_selected =>  $sub_type) {
+    $form['commerce_civicrm_contact_sub_type_'.$main_contact_types_selected] = array(
+      '#type' => 'select',
+      '#title' => t('Contact Sub type'),
+      '#default_value' => variable_get('commerce_civicrm_contact_sub_type_'.$main_contact_types_selected, array()),
+      '#options' => drupal_map_assoc($sub_type),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="commerce_civicrm_contact_type"]' => array('value' => $main_contact_types_selected),
+        ),
+      ),
+    );
+  }
+
+
+  $form['contact'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Contact Fields'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#attributes' =>  array('class' => array('three-col-fields')),
+  );
+  $form['contact']['commerce_civicrm_existing_contact'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Existing Contact'),
+    '#default_value' => variable_get('commerce_civicrm_existing_contact', false),
+    '#suffix' => '<div class="clearfix">&nbsp;</div>',
+  );
+
+  $contact_fields_opt = _craft_central_module_get_contact_fields();
+  $contact_fields = _craft_central_module_create_commerce_config_fields('contact', $contact_fields_opt);
+  $form['contact'] = array_merge($form['contact'], $contact_fields);
+
+
+  $form['communication'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Communication Fields'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#attributes' =>  array('class' => array('three-col-fields')),
+  );
+  $communication_fields_opt = _craft_central_module_get_communication_fields();
+  $communication_fields = _craft_central_module_create_commerce_config_fields('communication', $communication_fields_opt);
+  $form['communication'] = array_merge($form['communication'], $communication_fields);
+
+  $form['demographics'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Communication Fields'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#attributes' =>  array('class' => array('three-col-fields')),
+  );
+  $demographics_fields_opt = _craft_central_module_get_demographics_fields();
+  $demographics_fields = _craft_central_module_create_commerce_config_fields('demographics', $demographics_fields_opt);
+  $form['demographics'] = array_merge($form['demographics'], $demographics_fields);
+
+  $form['address_fields'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Communication Fields'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#attributes' =>  array('class' => array('three-col-fields')),
+  );
+  $address_fields_opt = _craft_central_module_get_address_fields();
+  $address_fields = _craft_central_module_create_commerce_config_fields('address_fields', $address_fields_opt);
+  $form['address_fields'] = array_merge($form['address_fields'], $address_fields);
+
+  return system_settings_form($form);
+}
+
+function _craft_central_module_create_commerce_config_fields($field_set_key, $form_fields){
+  $form = array();
+
+  foreach ($form_fields as $key => $form_field) {
+    $form[$field_set_key]['craft_central_module_'.$key] = array(
+      '#title' => t($form_field['label']),
+      '#type' => 'checkbox',
+      '#default_value' => variable_get('craft_central_module_'.$key, ''),
+      '#prefix' => '<div class="field-combo">',
+    );
+    $form[$field_set_key]['craft_central_module_'.$key.'_title'] = array(
+      '#title' => t('Set Title for '.$form_field['label']),
+      '#type' => 'textfield',
+      '#default_value' => variable_get('craft_central_module_'.$key.'_title', $form_field['label']),
+      '#states' => array(
+        // Hide the settings when the cancel notify checkbox is disabled.
+        'invisible' => array(
+          ':input[name="craft_central_module_'.$key.'"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+    $form[$field_set_key]['craft_central_module_'.$key.'_weight'] = array(
+      '#title' => t('Set Weight for '.$form_field['label']),
+      '#type' => 'weight',
+      '#default_value' => variable_get('craft_central_module_'.$key.'_weight', 0),
+      '#states' => array(
+        // Hide the settings when the cancel notify checkbox is disabled.
+        'invisible' => array(
+          ':input[name="craft_central_module_'.$key.'"]' => array('checked' => FALSE),
+        ),
+      ),
+      '#suffix' => '</div><div class="clearfix">&nbsp;</div>',
+    );
+  }
+  return $form;
+}
+function _craft_central_module_get_civicrm_memerships(){
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $mem_result = civicrm_api3('membership_type', 'get', array());
+
+  foreach ($mem_result['values'] as $all_membership_type) {
+    $membership_types[$all_membership_type['id']] = $all_membership_type['name'];
+  }
+  return $membership_types;
+}
+
+function _craft_central_module_get_civicrm_lang_options(){
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $lang_options = array();
+  $result = civicrm_api3('OptionValue', 'get', array(
+    'return' => "label,name,value",
+    'option_group_id' => "languages",
+    'is_active' => 1,
+    'options' => array('sort' => "weight", 'limit' => 0),
+  ));
+  foreach ($result['values'] as $option) {
+    $lang_options[$option['name']] = $option['label'];
+  }
+  return $lang_options;
+}
+
+function _craft_central_module_get_civicrm_countries(){
+  $country = array();
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $result = civicrm_api3('Country', 'get', array());
+  foreach ($result['values'] as $all_countries) {
+    $country[$all_countries['id']] = $all_countries['name'];
+  }
+  return $country;
+}
+
+/**
+ * Implements hook_commerce_checkout_pane_info()
+ */
+function craft_central_module_commerce_checkout_pane_info() {
+  $title = variable_get('craft_central_module_pane_title', 'CiviCRM Membership Pane');
+  $panes['craft_central_module'] = array(
+    'title' => t($title),
+    'page' => 'checkout',
+    'weight' => 10,
+    'base' => 'craft_central_module_pane',
+  );
+  return $panes;
+}
+
+/**
+ * Implements base_settings_form()
+ */
+function craft_central_module_pane_settings_form($checkout_pane) {
+  $form['craft_central_module_pane_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Checkout Pane Title'),
+    '#default_value' => variable_get('craft_central_module_pane_title', 'CiviCRM Membership Pane'),
+  );
+  return $form;
+}
+
+function _craft_central_module_add_field($key, $checkout_form_field, $civi_user = array()){
+  $field = false;
+
+  if(variable_get('craft_central_module_'.$key, '') && is_array($checkout_form_field)){
+
+    $field = array(
+      '#title' => variable_get('craft_central_module_'.$key.'_title', $checkout_form_field['label']),
+      '#type' => $checkout_form_field['fieldtype'],
+      '#weight' => variable_get('craft_central_module_'.$key.'_weight', ''),
+    );
+    if(array_key_exists('options', $checkout_form_field)){
+      $field['#options'] = $checkout_form_field['options'];
+    }
+    if(array_key_exists($key, $civi_user) && $checkout_form_field['fieldtype'] == 'item'){
+      $field['#markup'] = $civi_user[$key];
+    }
+    if(variable_get('commerce_civicrm_existing_contact', false) || (array_key_exists('craft_central_module_check_user', $_SESSION)
+        && isset($_SESSION["craft_central_module_check_user"]["checkout"][arg(1)]))){
+      if($checkout_form_field['fieldtype'] == 'date' && $civi_user[$key] !=''){
+        $new_date = explode('-', $civi_user[$key]);
+        $default_value['month'] = $new_date[1];
+        $default_value['day'] = $new_date[2];
+        $default_value['year'] = $new_date[0];
+      }else if ($checkout_form_field['fieldtype'] == 'checkboxes' && !is_array($civi_user[$key])){
+        $default_value = array();
+      }else{
+        $default_value = $civi_user[$key];
+      }
+      $field['#default_value'] = $default_value;
+    }
+  }
+  return $field;
+}
+
+function _craft_central_module_create_commerce_fields($field_set_key, $form_fields, $civi_user){
+  $checkout_form = array();
+
+  foreach ($form_fields as $key => $form_field) {
+    if($field = _craft_central_module_add_field($key, $form_field, $civi_user)){
+      $checkout_form[$field_set_key][$key] = $field;
+    }
+  }
+  return $checkout_form;
+}
+
+/**
+ * Implements base_checkout_form()
+ */
+function craft_central_module_pane_checkout_form($form, $form_state, $checkout_pane, $order) {
+  $checkout_form = array();
+  if (!civicrm_initialize()) {
+    return;
+  }
+  global $user;
+  $civi_user = array();
+  $main_contact_types_selected = variable_get('commerce_civicrm_contact_type', '');
+  $sub_contact_types_selected = variable_get('commerce_civicrm_contact_sub_type_'.$main_contact_types_selected, '');
+  if(!isset($main_contact_types_selected) || $main_contact_types_selected == ''){
+    drupal_set_message(t('Please configure Store > CiviCRM Membership settings.'));
+    return array();
+  }
+
+  if(variable_get('commerce_civicrm_existing_contact', false)){
+    $civi_user = _craft_central_module_get_contact($user->uid);
+  }else if(array_key_exists('craft_central_module_check_user', $_SESSION)
+    && isset($_SESSION["craft_central_module_check_user"]["checkout"][arg(1)])){
+    $id = $_SESSION["craft_central_module_check_user"]["checkout"][arg(1)];
+    $res = civicrm_api('contact', 'get', array('contact_id' => $id, 'version' => 3));
+    $civi_user = $res['values'][$res['id']];
+  }
+
+
+  $contact_fields_opt = _craft_central_module_get_contact_fields();
+  $contact_fields = _craft_central_module_create_commerce_fields('contact', $contact_fields_opt, $civi_user);
+  if(is_array($contact_fields) & count($contact_fields)){
+    $checkout_form['contact'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Contact Fields'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $checkout_form['contact'] = array_merge($checkout_form['contact'], $contact_fields['contact']);
+  }
+
+  $communication_fields_opt = _craft_central_module_get_communication_fields();
+  $communication_fields = _craft_central_module_create_commerce_fields('communication', $communication_fields_opt, $civi_user);
+  if(is_array($communication_fields) & count($communication_fields)){
+    $checkout_form['communication'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Communication Fields'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $checkout_form['communication'] = array_merge($checkout_form['communication'], $communication_fields['communication']);
+  }
+
+  $demographics_fields_opt = _craft_central_module_get_demographics_fields();
+  $demographics_fields = _craft_central_module_create_commerce_fields('demographics', $demographics_fields_opt, $civi_user);
+  if(is_array($demographics_fields) & count($demographics_fields)){
+    $checkout_form['demographics'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Demographic Fields'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $checkout_form['demographics'] = array_merge($checkout_form['demographics'], $demographics_fields['demographics']);
+  }
+
+  $address_fields_opt = _craft_central_module_get_address_fields();
+  $address_fields = _craft_central_module_create_commerce_fields('address_fields', $address_fields_opt, $civi_user);
+  if(is_array($address_fields) & count($address_fields)){
+    $checkout_form['address_fields'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Address Fields'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $checkout_form['address_fields'] = array_merge($checkout_form['address_fields'], $address_fields['address_fields']);
+  }
+
+
+  return $checkout_form;
+}
+
+/**
+ * Implements hook_commerce_order_presave().
+ * Update CiviCRM contact when order is updated.
+ *
+ * @param $order
+ *   The order object to be saved.
+ *
+ * @see rules_invoke_all()
+ */
+function craft_central_module_commerce_order_presave($order) {
+
+  // Only update when a new order revision is being saved.
+  $statuses = array(
+    'checkout_review',
+    'cart',
+    'checkout_checkout',
+    'checkout_delivery_address',
+    'checkout_shipping',
+    'checkout_payment',
+  );
+
+
+  if($order->status == "checkout_complete" && array_key_exists('craft_central_module_check_user', $_SESSION)
+    && isset($_SESSION["craft_central_module_check_user"]["checkout"][$order->order_number])){
+    if (!civicrm_initialize()) {
+      return;
+    }
+
+    foreach($order->commerce_line_items[LANGUAGE_NONE] as $li) {
+      $line_item = commerce_line_item_load($li['line_item_id']);
+      if(property_exists($line_item, 'field_membership_start_date')){
+        $field_membership_start_date = $line_item->field_membership_start_date[LANGUAGE_NONE][0]['value'];
+        $membership_start_date = date('Y-m-d', strtotime($field_membership_start_date));
+      }else{
+        $membership_start_date = date('Y-m-d', time());
+      }
+
+      $product = commerce_product_load($line_item->commerce_product[LANGUAGE_NONE][0]['product_id']);
+      if($product->type == 'membership'){
+        $split_sku = explode('-', $product->sku);
+        $sku = $split_sku[0];
+        $membership_duration_interval = $product->membership_duration_interval[LANGUAGE_NONE][0]['value'];
+        $membership_duration_time = $product->membership_duration_time[LANGUAGE_NONE][0]['value'];
+        break;
+      }
+    }
+    $membership_end_date = ($membership_duration_time != 'lifetime') ? date('Y-m-d', strtotime($membership_start_date.' +'.$membership_duration_interval.' '.$membership_duration_time)) : '';
+    $membership_create_param = array(
+      'version' => 3,
+      'sequential' => 1,
+      'contact_id' => $_SESSION["craft_central_module_check_user"]["checkout"][$order->order_number],
+      'membership_type_id' => $sku,
+      'start_date' => $membership_start_date,
+      'end_date' => $membership_end_date,
+      'source' => "Drupal Commerce",
+    );
+    $membership = civicrm_api3('Membership', 'create', $membership_create_param);
+
+    $sql = "SELECT id, name FROM civicrm_financial_type WHERE is_active = 1";
+    $dao = CRM_Core_DAO::executeQuery($sql, array());
+    while ($dao->fetch()) {
+      $types[$dao->id] = $dao->name;
+      if($dao->name == "Member Dues"){
+        $membership_types_id = $dao->id;
+      }
+    }
+    $total_amount = $order->commerce_order_total[LANGUAGE_NONE][0]['amount'];
+    $contribution_create_param = array(
+      'version' => 3,
+      'contact_id' => $_SESSION["craft_central_module_check_user"]["checkout"][$order->order_number],
+      'total_amount' => $total_amount,
+      'financial_type_id' => $membership_types_id,
+      // @FIXME this needs a sensible default
+      'non_deductible_amount' => 00.00,
+      'fee_amount' => 00.00,
+      'net_amount' => $total_amount,
+      'source' => 'Drupal Commerce',
+    );
+    $contribution = civicrm_api3('Contribution', 'create', $contribution_create_param);
+    watchdog('craft_central_module', 'User ID:'.$_SESSION["craft_central_module_check_user"]["checkout"][$order->order_number]
+      .' Added Contribution ID:'.$contribution['id'].' Added Membership ID:'.$membership['id']);
+
+    unset($_SESSION["craft_central_module_check_user"]["checkout"][$order->order_number]);
+  }
+
+}
+
+
+/**
+ * Implements base_checkout_form_submit()
+ */
+function craft_central_module_pane_checkout_form_submit($form, &$form_state, $checkout_pane, $order) {
+  if(!array_key_exists('craft_central_module', $form_state['values'])){
+    return;
+  }
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  // Needed for civicrm_location_update
+  require_once 'api/v3/Address.php';
+  // Create and Update CiviCRM contact
+  global $user;
+  $civi_user = _craft_central_module_get_contact($user->uid);
+
+  $main_contact_types_selected = variable_get('commerce_civicrm_contact_type', '');
+  $sub_contact_types_selected = variable_get('commerce_civicrm_contact_sub_type_'.$main_contact_types_selected, '');
+  $param = array(
+    'version' => 3,
+    'sequential' => 1,
+    'contact_type' => ucfirst($main_contact_types_selected),
+    'contact_sub_type' =>array($sub_contact_types_selected),
+  );
+  // Contact and Billing location.
+  $c_address_param = array(
+    'location_type_id' => 1,
+  );
+  foreach ($form_state['values']['craft_central_module'] as $key => $value) {
+    $param = array_merge($param, $value);
+    if($key == "address_fields" && isset($value) && $value != ''){
+      $c_address_param = array_merge($c_address_param, $value);
+    }
+  }
+  if(array_key_exists('birth_date', $param)){
+    $param['birth_date'] = $param['birth_date']['year'].'-'.$param['birth_date']['month'].'-'.$param['birth_date']['day'];
+  }
+  if(array_key_exists('deceased_date', $param)){
+    $param['deceased_date'] = $param['deceased_date']['year'].'-'.$param['deceased_date']['month'].'-'.$param['deceased_date']['day'];
+  }
+
+  if(array_key_exists('preferred_communication_method', $param)){
+    foreach($param['preferred_communication_method'] as $key => $preferred_communication_method){
+      if(!$preferred_communication_method){
+        unset($param['preferred_communication_method'][$key]);
+      }
+    }
+  }
+
+  if(variable_get('commerce_civicrm_existing_contact', false)){
+    $param['id'] = $civi_user['id'];
+  }else if(array_key_exists('craft_central_module_check_user', $_SESSION)
+    && isset($_SESSION["craft_central_module_check_user"]["checkout"][arg(1)])){
+    $param['id'] = $_SESSION["craft_central_module_check_user"]["checkout"][arg(1)];
+  }
+
+  $result = civicrm_api3('Contact', 'create', $param);
+  $_SESSION["craft_central_module_check_user"]["checkout"][arg(1)] = $result['id'];
+  $c_address_param['contact_id'] = $result['id'];
+  if(array_key_exists('address_id', $civi_user) && is_numeric($civi_user['address_id'])){
+    $c_address_param['id'] = $civi_user['address_id'];
+  }
+  watchdog('craft_central_module', 'Address fields:<pre>'.var_export($c_address_param, TRUE).'</pre>');
+  // finally create / update the contact address
+  $new_contact_location = civicrm_api3_address_create($c_address_param);
+  $shipping_address =
+    $form_state['values']['customer_profile_billing']['customer_profile']->commerce_customer_address[LANGUAGE_NONE][0];
+  // check if the address of type billing exits before creating a new else update
+  $location_info = civicrm_api3('Address', 'get', array(
+    'sequential' => 1,
+    'contact_id' => $result['id'],
+    'location_type_id' => 5,
+  ));
+
+  $b_address_param = array(
+    'contact_id' => $result['id'],
+    'location_type_id' => 5,
+    'city' => $shipping_address['locality'],
+    'postal_code' => $shipping_address['postal_code'],
+    'street_address' => $shipping_address['thoroughfare'],
+    'supplemental_address_1' => $shipping_address['premise'],
+  );
+  // if billing address exist update it
+  if ($location_info['count'] > 0) {
+    $b_address_param['id'] = $location_info['values'][0]['id'];
+  }
+  // finally create / update the billing address
+  $new_billing_location = civicrm_api3_address_create($b_address_param);
+}
+
+
+/**
+ * Retrieves a CiviCRM contact by Drupal user ID.
+ */
+function _craft_central_module_get_contact($uid) {
+  $contacts = &drupal_static(__FUNCTION__);
+  if (isset($contacts[$uid])) {
+    return $contacts[$uid];
+  }
+  if (!isset($contacts)) {
+    $contacts = array();
+  }
+  $contacts[$uid] = FALSE;
+  if (!civicrm_initialize()) {
+    return;
+  }
+  require_once 'api/api.php';
+  $res = civicrm_api('uf_match', 'get', array('uf_id' => $uid, 'version' => 3));
+  if ($res['is_error'] || empty($res['id']) || empty($res['values'][$res['id']])) {
+    return FALSE;
+  }
+  $id = $res['values'][$res['id']]['contact_id'];
+  $res = civicrm_api('contact', 'get', array('contact_id' => $id, 'version' => 3));
+  if ($res['is_error']) {
+    return FALSE;
+  }
+  $contacts[$uid] = $res['values'][$res['id']];
+  return $contacts[$uid];
+}
+
+function _craft_central_module_get_contact_fields(){
+  $civicrm_fields = array();
+  $civicrm_fields['contact_id'] = array('label' => 'Conact ID','fieldtype' => 'item', 'default_value' => '');
+
+  $civicrm_fields['prefix_id'] = array(
+    'label' => 'Prefix','fieldtype' => 'select', 'default_value' => '',
+    'options'=> array(
+      1=>'Mrs.',
+      2=>'Ms.',
+      3=>'Mr.',
+      4=>'Dr.',
+    ),
+  );
+  $civicrm_fields['first_name'] = array('label' => 'First Name','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['middle_name'] = array('label' => 'Middle Name','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['last_name'] = array('label' => 'Last Name','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['suffix_id'] = array(
+    'label' => 'Suffix','fieldtype' => 'select', 'default_value' => '',
+    'options'=> array(
+      1=>'Jr.',
+      2=>'Sr.',
+      3=>'II',
+      4=>'III',
+      5=>'IV',
+      6=>'V',
+      7=>'VI',
+      8=>'VII',
+    ),
+  );
+  $civicrm_fields['nick_name'] = array('label' => 'Nick Name','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['job_title'] = array('label' => 'Job Title','fieldtype' => 'textfield', 'default_value' => '');
+
+  $civicrm_fields['on_hold'] = array('label' => 'Email On Hold','fieldtype' => 'checkbox', 'default_value' => '');
+
+  $civicrm_fields['phone'] = array('label' => 'Phone','fieldtype' => 'textfield', 'default_value' => '');
+
+  return $civicrm_fields;
+}
+function _craft_central_module_get_communication_fields(){
+  $civicrm_fields = array();
+
+  //Communication
+  $civicrm_fields['preferred_communication_method'] = array(
+    'label' => 'Preferred Communication Method','fieldtype' => 'checkboxes', 'default_value' => '',
+    'options'=> array(
+      1=>'Phone',
+      2=>'Email',
+      3=>'Post Mail',
+      4=>'SMS',
+      5=>'Fax',
+    ),
+  );
+  $civicrm_fields['preferred_language'] = array(
+    'label' => 'Preferred Language','fieldtype' => 'select', 'default_value' => '',
+    // Load from CiviCRM Directly
+    'options'=> _craft_central_module_get_civicrm_lang_options(),
+  );
+  $civicrm_fields['preferred_mail_format'] = array(
+    'label' => 'Preferred Mail Format','fieldtype' => 'select', 'default_value' => '',
+    'options'=> array(
+      'Both'=>'Both',
+      'HTML'=>'HTML',
+      'Text'=>'Text',
+    ),
+  );
+
+  $civicrm_fields['communication_style_id'] = array(
+    'label' => 'Communication Style','fieldtype' => 'radios', 'default_value' => '',
+    'options'=> array(
+      1=>'Formal',
+      2=>'Familiar',
+    ),
+  );
+
+  $civicrm_fields['do_not_email'] = array(
+    'label' => 'Do Not Email','fieldtype' => 'checkbox', 'default_value' => '',
+  );
+  $civicrm_fields['do_not_phone'] = array(
+    'label' => 'Do Not Phone','fieldtype' => 'checkbox', 'default_value' => '',
+  );
+  $civicrm_fields['do_not_mail'] = array(
+    'label' => 'Do Not Mail','fieldtype' => 'checkbox', 'default_value' => '',
+  );
+  $civicrm_fields['do_not_sms'] = array(
+    'label' => 'Do Not SMS','fieldtype' => 'checkbox', 'default_value' => '',
+  );
+  $civicrm_fields['do_not_trade'] = array(
+    'label' => 'Do Not Trade','fieldtype' => 'checkbox', 'default_value' => '',
+  );
+  $civicrm_fields['is_opt_out'] = array(
+    'label' => 'NO BULK EMAILS (User Opt Out)', 'fieldtype' => 'checkbox', 'default_value' => '',
+  );
+
+
+  return $civicrm_fields;
+}
+function _craft_central_module_get_demographics_fields(){
+  $civicrm_fields = array();
+
+  //Demographics
+  $civicrm_fields['gender'] = array(
+    'label' => 'Gender','fieldtype' => 'radios', 'default_value' => '',
+    'options'=> array(
+      'Female'=>'Female',
+      'Male'=>'Male',
+      'Transgender'=>'Transgender',
+    ),
+  );
+  $civicrm_fields['birth_date'] = array('label' => 'Date of Birth','fieldtype' => 'date', 'default_value' => '');
+  $civicrm_fields['is_deceased'] = array('label' => 'Contact is Deceased','fieldtype' => 'checkbox', 'default_value' => '');
+  $civicrm_fields['deceased_date'] = array('label' => 'Deceased Date','fieldtype' => 'date', 'default_value' => '');
+
+  return $civicrm_fields;
+}
+function _craft_central_module_get_address_fields(){
+  $civicrm_fields = array();
+
+  //Address Field
+  $civicrm_fields['street_address'] = array('label' => 'Street Address','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['supplemental_address_1'] = array('label' => 'Supplemental Address 1','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['supplemental_address_2'] = array('label' => 'Supplemental Address 2','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['city'] = array('label' => 'City','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['postal_code_suffix'] = array('label' => 'Zip / Postal Code Suffix','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['postal_code'] = array('label' => 'Zip / Postal Code','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['geo_code_1'] = array('label' => 'Latitude','fieldtype' => 'textfield', 'default_value' => '');
+  $civicrm_fields['geo_code_2'] = array('label' => 'Longitude','fieldtype' => 'textfield', 'default_value' => '');
+
+  $civicrm_fields['country_id'] = array(
+    'label' => 'Country','fieldtype' => 'select', 'default_value' => '',
+    // Load from CiviCRM Directly
+    'options'=> _craft_central_module_get_civicrm_countries(),
+  );
+
+  return $civicrm_fields;
+}

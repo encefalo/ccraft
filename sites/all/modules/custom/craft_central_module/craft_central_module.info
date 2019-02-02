@@ -1,0 +1,12 @@
+
+name = Craft central Module
+description = Functions custom by Craft central
+core = 7.x
+
+dependencies[] = civicrm
+dependencies[] = commerce_order
+dependencies[] = commerce_cart
+dependencies[] = commerce_product_ui
+dependencies[] = commerce_product_reference
+
+configure = admin/commerce/config/craft_central
